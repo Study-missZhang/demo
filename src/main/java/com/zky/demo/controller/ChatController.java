@@ -1,10 +1,9 @@
 package com.zky.demo.controller;
 
+import com.zky.demo.controller.vo.ChatRequestVO;
 import com.zky.demo.service.ChatService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 
@@ -15,8 +14,8 @@ public class ChatController {
     @Autowired
     private ChatService chatService;
 
-    @GetMapping(value = "stream", produces = "text/event-stream;charset=UTF-8")
-    public SseEmitter stream(String  question){
+    @PostMapping(value = "stream", produces = "text/event-stream;charset=UTF-8")
+    public SseEmitter stream(@RequestBody ChatRequestVO chatRequestVO){
         SseEmitter sseEmitter = new SseEmitter(60_000L);  // 60 秒超时
 
         // 注册 SseEmitter 的生命周期回调
@@ -38,7 +37,7 @@ public class ChatController {
         });
 
 
-        chatService.stream(question, sseEmitter);
+        chatService.stream(chatRequestVO, sseEmitter);
 
         return sseEmitter;
 

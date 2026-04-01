@@ -1,5 +1,6 @@
 package com.zky.demo.service;
 
+import com.zky.demo.controller.vo.ChatRequestVO;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.SystemMessage;
@@ -16,6 +17,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class ChatServiceImpl implements ChatService {
@@ -23,19 +26,23 @@ public class ChatServiceImpl implements ChatService {
     private static final String SYSTEM_PROMPT =
             "你是一名和蔼可亲的老师，总是可以用简单的话语回答同学的问题。";
 
-    // 最多记忆10条对话
-    private final ChatMemory chatMemory = MessageWindowChatMemory.withMaxMessages(10);
+    private final Map<String, ChatMemory> memoryMap = new ConcurrentHashMap<>();
 
     @Autowired
     private StreamingChatLanguageModel streamingChatLanguageModel;
 
 
     @Override
-    public void stream(String question, SseEmitter sseEmitter) {
+    public void stream(ChatRequestVO chatRequestVO, SseEmitter sseEmitter) {
 
+        String sessionId = chatRequestVO.getSessionId();
 
+        String question = chatRequestVO.getQuestion();
 
-        // 把本子问题存入聊天记忆中
+        // 设置上下文记忆10条，根据sessionId进行区分
+        ChatMemory chatMemory = memoryMap.computeIfAbsent(sessionId, id -> MessageWindowChatMemory.withMaxMessages(10));
+
+        // 把问题存入聊天记忆中
         chatMemory.add(UserMessage.from(question));
 
         List<ChatMessage> messages = new ArrayList<>();

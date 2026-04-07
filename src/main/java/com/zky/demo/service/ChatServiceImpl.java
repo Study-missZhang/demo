@@ -1,5 +1,6 @@
 package com.zky.demo.service;
 
+import com.zky.demo.config.RedisChatMemoryStore;
 import com.zky.demo.controller.vo.ChatRequestVO;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
@@ -26,7 +27,8 @@ public class ChatServiceImpl implements ChatService {
     private static final String SYSTEM_PROMPT =
             "你是一名和蔼可亲的老师，总是可以用简单的话语回答同学的问题。";
 
-    private final Map<String, ChatMemory> memoryMap = new ConcurrentHashMap<>();
+    @Autowired
+    private RedisChatMemoryStore redisChatMemoryStore;
 
     @Autowired
     private StreamingChatLanguageModel streamingChatLanguageModel;
@@ -39,8 +41,11 @@ public class ChatServiceImpl implements ChatService {
 
         String question = chatRequestVO.getQuestion();
 
-        // 设置上下文记忆10条，根据sessionId进行区分
-        ChatMemory chatMemory = memoryMap.computeIfAbsent(sessionId, id -> MessageWindowChatMemory.withMaxMessages(10));
+        ChatMemory chatMemory = MessageWindowChatMemory.builder()
+                .id(sessionId)
+                .maxMessages(10)
+                .chatMemoryStore(redisChatMemoryStore)
+                .build();
 
         // 把问题存入聊天记忆中
         chatMemory.add(UserMessage.from(question));

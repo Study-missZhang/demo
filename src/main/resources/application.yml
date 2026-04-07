@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: demo
+  mandatory-file-encoding: UTF-8
+
+  data:
+    redis:
+      host: 117.72.35.255
+      port: 16379
+      timeout: 5000
+      password: 123456
+
+
+deepseek:
+  api-key: sk-0963b1bf0ad7470c80bf24032310b2e9
+  base-url: https://api.deepseek.com/v1
+  model: deepseek-chat
+
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

@@ -8,9 +8,8 @@ public interface ChatService {
     /**
      * 聊天方法
      *
-     * @param question
+     * @param chatRequestVO
      * @param sseEmitter
-     * @param sessionId 会话id
      */
     void stream(ChatRequestVO chatRequestVO, SseEmitter sseEmitter);
 }
